@@ -1,0 +1,104 @@
+---
+title: "Target Win Number for OR Congressional Primary"
+author: "Jasmine Dumas (jasmine.dumas@gmail.com)"
+date: "Created: 3/21/2018"
+output: pdf_document
+---
+
+## Methods Research:
+
+- In Oregon, only registered party members can participate in a political party's primary election. This applies to both presidential preference primaries and primaries for other offices (including congressional, state-level, and local offices).
+
+- Winners in Oregon primary elections are determined via plurality vote, meaning that the candidate with the highest number of votes wins even if he or she did not win an outright majority of votes cast. 
+
+## Analysis process:
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE,
+	fig.align='center'
+)
+```
+- load R libraries
+```{r}
+library(RSocrata)
+library(tidyverse)
+library(ggplot2)
+theme_set(theme_bw())
+library(magrittr)
+library(lubridate)
+library(forcats)
+library(kableExtra)
+library(knitr)
+library(glue)
+library(devtools)
+```
+
+- Get voter registration data from data.oregon.gov/ using Socrata
+```{r}
+voter_reg_data <- read.socrata(url = "https://data.oregon.gov/Administrative/Voter-Registration-Data/6a4f-ecbi/data")
+```
+
+- Reduce the data set to the relevant district 2
+
+```{r}
+voter_reg_data %<>% dplyr::filter(CD_NAME == 'US Congressional District 2', PARTY == "Democrat")
+
+head(voter_reg_data[, c(1, 5, 6, 8)]) %>% knitr::kable() %>% kable_styling()
+```
+
+- Clean up the `SYSDATE` column (the date the data was entered) and extract out some date parts
+
+```{r}
+voter_reg_data$SYSDATE <- ymd(voter_reg_data$SYSDATE)
+
+voter_reg_data$year <- year(voter_reg_data$SYSDATE)
+
+voter_reg_data$month <- month(voter_reg_data$SYSDATE)
+
+voter_reg_data$day <- day(voter_reg_data$SYSDATE)
+```
+
+
+- Visualize the Count of Active Registered Voters for the most recent data entry
+```{r plot, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE}
+voter_reg_data %>% 
+  dplyr::filter(year == 2018, month == 3) %>% 
+  ggplot(aes(x = fct_reorder(COUNTY, COUNT.V.ID., fun=mean,na.rm=TRUE), y = COUNT.V.ID., fill = COUNTY)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  #scale_fill_brewer(palette = "Set1") +
+  labs(title = "Count of Active Registered Voters", 
+       subtitle = "Jackson County has the highest # of voters, followed by Deschutes",
+       x = "", y = "Count") +
+  guides(fill=F)
+```
+- The most recent months registration data and percentages
+```{r}
+voter_reg_data %>% group_by(COUNTY) %>% 
+  dplyr::filter(year == 2018, month == 3) %>% 
+  summarise(n = sum(`COUNT.V.ID.`)) %>% 
+  mutate(percentage = n /sum(n) * 100) %>% 
+  knitr::kable() %>% 
+  kable_styling()
+```
+
+```{r}
+total_voters <- 
+  voter_reg_data %>% 
+  dplyr::filter(year == 2018, month == 3) %>% 
+  summarise(n = sum(`COUNT.V.ID.`))
+
+date <- max(voter_reg_data$SYSDATE)
+glue("Total number of voters in District 2 as of {date} is {total_voters}")
+```
+- Divide the total amount of registered voters by the amount of candidates + 1 to determine the target amount of voters or `r round((20126/140872) * 100, 2)`% of the votes!
+```{r}
+votes_needed <- round((total_voters / 7)) + 1
+
+glue("Votes needed to win the Democratic Primaries is {votes_needed}")
+```
+
+
+

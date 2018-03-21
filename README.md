@@ -2,10 +2,11 @@
 Volunteer Election Analytics for [Jamie McLeod-Skinner](https://jamiefororegon.com/) (Oregon's 2nd Congressional District election, 2018)
 
 
-## Goals
+## Analysis Projects
 
-1. What is the target win number for the [primary](https://en.wikipedia.org/wiki/Primary_election) on May 15, 2018 for 7 candidates for the Democratic ticket?
+1. What is the target win number for the [primary](https://ballotpedia.org/Primary_elections_in_Oregon) on May 15, 2018?
 
+![Blue is District 2](https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Oregon_Congressional_Districts%2C_113th_Congress.tif/lossless-page1-586px-Oregon_Congressional_Districts%2C_113th_Congress.tif.png)
 
 
 ## Data Links
